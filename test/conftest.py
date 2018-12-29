@@ -7,8 +7,9 @@ Any fixtures declared here are available to all test functions in this directory
 import logging
 
 import pytest
+from brewblox_service import service, brewblox_logger, features
 
-from brewblox_service import service
+LOGGER = brewblox_logger(__name__)
 
 
 @pytest.fixture(scope='session', autouse=True)
@@ -16,6 +17,7 @@ def log_enabled():
     """Sets log level to DEBUG for all test functions.
     Allows all logged messages to be captured during pytest runs"""
     logging.getLogger().setLevel(logging.DEBUG)
+    logging.captureWarnings(True)
 
 
 @pytest.fixture
@@ -24,7 +26,7 @@ def app_config() -> dict:
         'name': 'test_app',
         'host': 'localhost',
         'port': 1234,
-        'debug': False,
+        'debug': True,
     }
 
 
@@ -50,4 +52,8 @@ def client(app, aiohttp_client, loop):
 
     Any tests wishing to add custom behavior to app can override the fixture
     """
+    LOGGER.info('Available features:')
+    for name, impl in app.get(features.FEATURES_KEY, {}).items():
+        LOGGER.info(f'Feature "{name}" = {impl}')
+
     return loop.run_until_complete(aiohttp_client(app))
