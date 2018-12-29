@@ -1,7 +1,6 @@
 """
 Example of how to import and use the brewblox service
 """
-
 from typing import Union
 
 from aiohttp import web
@@ -11,31 +10,25 @@ routes = web.RouteTableDef()
 LOGGER = brewblox_logger(__name__)
 
 
-@routes.post('/example/endpoint')
-async def example_endpoint_handler(request: web.Request) -> web.Response:
+@routes.post('/ispindel')
+async def ispindel_handler(request: web.Request) -> web.Response:
     """
-    Example endpoint handler. Using `routes.post` means it will only respond to POST requests.
-
-    When trying it out, it will echo whatever you send.
-
-    Each aiohttp endpoint should take a request as argument, and return a response.
-    You can add Swagger documentation in this docstring, or by adding a yaml file.
-    See http://aiohttp-swagger.readthedocs.io/en/latest/ for more details
+    This endpoint accepts request from iSpindel when configured to use the Generic HTTP POST.
 
     ---
     tags:
-    - Example
-    summary: Example endpoint.
-    description: An example of how to use aiohttp features.
-    operationId: example.endpoint
+    - iSpindel
+    summary: Endpoint to receive iSpindel metrics.
+    description: The iSpindel wake up and send an HTTP POST request to this endpoint.
+    operationId: brewblox_ispindel/ispindel
     produces:
     - text/plain
     parameters:
     -
-        in: body
+        in: body a iSpindel JSON containing current metrics
         name: body
         description: Input message
-        required: false
+        required: true
         schema:
             type: string
     """
@@ -64,6 +57,7 @@ async def on_message(subscription: events.EventSubscription, key: str, message: 
             If it was a JSON message, this is a dict. String otherwise.
 
     """
+
     LOGGER.info(f'Message from {subscription}: {key} = {message} ({type(message)})')
 
 
@@ -112,20 +106,18 @@ def add_events(app: web.Application):
     # Event subscription / publishing will be enabled after you call this function
     events.setup(app)
 
-    # Get the standard event listener
-    # This can be used to register as many subscriptions as you want
-    listener = events.get_listener(app)
-
-    # Subscribe to all events on 'brewblox' exchange
-    listener.subscribe('brewblox', '#', on_message=on_message)
+    # No subscription needed
+    # listener = events.get_listener(app)
+    # listener.subscribe('brewblox', '#', on_message=on_message)
 
 
 def main():
-    app = service.create_app(default_name='YOUR_PACKAGE')
+    app = service.create_app(default_name='ispindel')
 
+    # Init events
     add_events(app)
 
-    # Register routes in this file (/example/endpoint in our case)
+    # Register routes
     app.router.add_routes(routes)
 
     # Add all default endpoints, and adds prefix to all endpoints

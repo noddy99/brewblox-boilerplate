@@ -1,20 +1,20 @@
 FROM brewblox/brewblox-service:latest as base
 
-COPY ./dist /build/dist
+COPY ./dist /app/dist
 
 RUN pip3 install wheel \
-    && pip3 wheel /build/dist/* --wheel-dir=/wheeley --find-links=/wheeley
+    && pip3 wheel /app/dist/* --wheel-dir=/wheeley --find-links=/wheeley
 
 FROM python:3.7-slim
 EXPOSE 5000
 WORKDIR /app
 
 COPY --from=base /wheeley /wheeley
-COPY ./config /app/config
+#COPY ./config /app/config
 
 RUN ls /wheeley \
-    && pip3 install --no-index --find-links=/wheeley YOUR-PACKAGE \
+    && pip3 install --no-index --find-links=/wheeley brewblox-ispindel \
     && rm -rf /wheeley \
     && pip3 freeze
 
-ENTRYPOINT ["python3", "-m", "YOUR_PACKAGE"]
+ENTRYPOINT ["python3", "-m", "brewblox_ispindel"]

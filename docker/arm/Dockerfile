@@ -13,8 +13,8 @@ COPY --from=base /wheeley /wheeley
 COPY ./config /app/config
 
 RUN ls /wheeley \
-    && pip3 install --no-index --find-links=/wheeley YOUR-PACKAGE \
+    && pip3 install --no-index --find-links=/wheeley brewblox-ispindel \
     && rm -rf /wheeley \
     && pip3 freeze
 
-ENTRYPOINT ["python3", "-m", "YOUR_PACKAGE"]
+ENTRYPOINT ["python3", "-m", "brewblox_ispindel"]

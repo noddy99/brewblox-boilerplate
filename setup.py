@@ -1,12 +1,12 @@
 from setuptools import find_packages, setup
 
 setup(
-    name='YOUR-PROJECT',
+    name='brewblox-ispindel',
     version='0.1',
     long_description=open('README.md').read(),
-    url='YOUR_REPOSITORY',
-    author='YOUR NAME',
-    author_email='YOU@PROVIDER.com',
+    url='https://github.com/bdelbosc/brewblox-ispindel',
+    author='Benoit Delbosc',
+    author_email='bdelbosc@free.fr',
     classifiers=[
         'Development Status :: 3 - Alpha',
         'License :: OSI Approved :: GNU General Public License (GPL)',
@@ -14,7 +14,7 @@ setup(
         'Intended Audience :: End Users/Desktop',
         'Topic :: System :: Hardware',
     ],
-    keywords='brewing brewpi brewblox embedded plugin service',
+    keywords='brewing brewpi brewblox embedded plugin service ispindel hydrometer',
     packages=find_packages(exclude=['test', 'docker']),
     install_requires=[
         'brewblox-service~=0.14.0'

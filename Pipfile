@@ -5,6 +5,11 @@ name = "pypi"
 
 [packages]
 brewblox-service = "~=0.14.0"
+pytest-cov = "*"
+pytest-flake8 = "*"
+pytest-aiohttp = "*"
+aiohttp-swagger = "*"
+aioamqp = "*"
 
 [dev-packages]
 pytest-flake8 = "*"
