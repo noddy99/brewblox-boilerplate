@@ -10,13 +10,13 @@ This project is under active development.
 ## How does it work ?
 
 The iSpindel is configured to send metrics using the generic HTTP POST protocol.
- 
+
 When the iSpindel wake up (like every 2 minutes) it submits a POST request containing the metrics to the iSpindel BrewBlox service.
 
 The service then publish metrics to the event-bus, the BrewBlox history service is in charge to persist the metrics into the InfluxDB database.
 
 ## Configuration
- 
+
 ### iSpindel
 
 - Switch iSpindel on
@@ -42,19 +42,6 @@ Add the service to your docker compose file:
       - "traefik.frontend.rule=PathPrefix: /ispindel"
 ```
 
-
-## Subscribe to the history service
-
-To persist the metrics into InfluxDB the history service must subscribe to the iSpindel events:
-
-```bash
-curl -X POST --header 'Content-Type: application/json' --header 'Accept: application/octet-stream' -d '{ \ 
-   "relay": "data", \ 
-   "exchange": "brewblox", \ 
-   "routing": "iSpindel000" \ 
- }' 'http://localhost:9000/history/subscribe'
-```
-
 ## Development
 
 ### Setup dev environment
@@ -73,11 +60,10 @@ pipenv run pytest
 
 ### Build a docker image
 
+Assuming `DOCKER_REPO=brewblox-ispindel` in your .env file, this will generate `brewblox-ispindel:latest`.
+
 ```bash
-rm -rf ./dist/ ./docker/dist
-python3 setup.py sdist
-mv dist docker/dist
-docker build --tag brewblox-ispindel:latest --file docker/amd/Dockerfile  docker/
+bbt-localbuild --tags latest
 ```
 
 ### Simulate iSpindel request
@@ -89,8 +75,10 @@ curl -XPOST http://localhost:9000/ispindel/ispindel
 
 ### View influxdb data
 
+This is assuming a BrewBlox system is active in the current directory.
+
 ```sql
-docker exec -it brewblox-ui_influx_1 influx
+docker-compose exec -it influx influx
 > USE brewblox
 > SELECT * FROM "iSpindel000"
 name: iSpindel000
