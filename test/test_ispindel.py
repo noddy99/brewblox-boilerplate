@@ -3,10 +3,11 @@ Checks whether we can call the hello endpoint.
 """
 from unittest.mock import call
 
-import brewblox_ispindel.__main__ as main
 import pytest
 from asynctest import CoroutineMock
 from brewblox_service import scheduler
+
+import brewblox_ispindel.__main__ as main
 
 TESTED = main.__name__
 
@@ -57,6 +58,6 @@ async def test_ispindel(app, client, mock_publisher):
     assert await res.text() == ''
     assert mock_publisher.publish.call_count > 0
     assert mock_publisher.publish.call_args_list[-1] == call(
-        'brewblox',
+        'brewcast',
         'iSpindel000',
         EVENT_OK)

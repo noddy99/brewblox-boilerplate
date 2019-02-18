@@ -7,6 +7,11 @@ from brewblox_service import brewblox_logger, events, scheduler, service
 routes = web.RouteTableDef()
 LOGGER = brewblox_logger(__name__)
 
+# The brewblox history service is subscribed to this exchange by default
+# Anything published here is logged
+# See https://brewblox.netlify.com/dev/reference/event_logging.html for the spec
+HISTORY_EXCHANGE = 'brewcast'
+
 
 @routes.post('/ispindel')
 async def ispindel_handler(request: web.Request) -> web.Response:
@@ -41,11 +46,11 @@ async def ispindel_handler(request: web.Request) -> web.Response:
         LOGGER.info("Bad request: " + str(request.text()))
         return web.Response(status=400)
     publisher = events.get_publisher(request.app)
-    await publisher.publish('brewblox', name, {'temperature': temperature,
-                                               'battery': battery,
-                                               'angle': angle,
-                                               'rssi': rssi,
-                                               'gravity': gravity})
+    await publisher.publish(HISTORY_EXCHANGE, name, {'temperature': temperature,
+                                                     'battery': battery,
+                                                     'angle': angle,
+                                                     'rssi': rssi,
+                                                     'gravity': gravity})
     LOGGER.info(f'iSpindel {name}, temp: {temperature}, gravity: {gravity}')
     return web.Response(status=200)
 

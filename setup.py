@@ -17,7 +17,7 @@ setup(
     keywords='brewing brewpi brewblox embedded plugin service ispindel hydrometer',
     packages=find_packages(exclude=['test', 'docker']),
     install_requires=[
-        'brewblox-service~=0.14.0'
+        'brewblox-service'
     ],
     python_requires='>=3.7',
     extras_require={'dev': ['pipenv']}
