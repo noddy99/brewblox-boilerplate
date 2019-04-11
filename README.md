@@ -19,6 +19,8 @@ The service then publish metrics to the event-bus, the BrewBlox history service 
 
 ### iSpindel
 
+Assuming BrewBlox is accessible at http://<BREWBLOX_IP>:9000/:
+
 - Switch iSpindel on
 - Press the reset button 3-4 times which sets up an access point
 - Connect to the Wifi network "iSpindel"
@@ -31,42 +33,64 @@ The service then publish metrics to the event-bus, the BrewBlox history service 
     - Server URL: `/ispindel/ispindel`
 
 
+
 ### Deploy on the BrewBlox stack
 
-Add the service to your docker compose file:
+Docker images are available on docker hub, you need to add the service to your docker compose file:
 ```yaml
   ispindel:
-    image: brewblox-ispindel:latest
+    image: bdelbosc/brewblox-ispindel:rpi-latest
+    depends_on:
+      - history
     labels:
       - "traefik.port=5000"
       - "traefik.frontend.rule=PathPrefix: /ispindel"
 ```
 
+Note that the image tag to use is:
+- `rpi-latest` for the `arm` architecture (when deploying on a RaspberryPi)
+- `latest` for the `amd` architecture
+
+### Add Graph to your dashboard
+
+From your dashboard add "ACTIONS" > "New Widget" 
+Select a Graph widget type, give it a title and Create.
+
+Then configure Metrics you should see something like that:
+
+![graph-ispindel](./graph-ispindel.png)
+
+  
 ## Development
-
-### Setup dev environment
-
-```bash
-sudo pip3 install pipenv
-pipenv lock
-pipenv sync -d
-```
 
 ### Run tests
 
 ```bash
+# install pip3 if not already done
+sudo pip3 install pipenv
+
+# init the env
+pipenv lock
+pipenv sync -d
+
+# Run the tests
 pipenv run pytest
 ```
 
 ### Build a docker image
 
-Assuming `DOCKER_REPO=brewblox-ispindel` in your .env file, this will generate `brewblox-ispindel:latest`.
+1. Install the [brewblox-tools](https://github.com/BrewBlox/brewblox-tools)
 
+2. Go into the brewblox-ispindel directory and build the `rpi-latest` image
 ```bash
-bbt-localbuild --tags latest
+bbt-localbuild -r bdelbosc/brewblox-ispindel --tags latest -a arm
 ```
 
+Use `-a amd` to build the `latest` image for amd architecture.
+
 ### Simulate iSpindel request
+
+From the BrewBlox host:
 
 ```bash
 curl -XPOST http://localhost:9000/ispindel/ispindel
@@ -78,7 +102,7 @@ curl -XPOST http://localhost:9000/ispindel/ispindel
 This is assuming a BrewBlox system is active in the current directory.
 
 ```sql
-docker-compose exec -it influx influx
+docker-compose exec influx influx
 > USE brewblox
 > SELECT * FROM "iSpindel000"
 name: iSpindel000
