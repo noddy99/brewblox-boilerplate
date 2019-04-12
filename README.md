@@ -17,26 +17,11 @@ The service then publish metrics to the event-bus, the BrewBlox history service 
 
 ## Configuration
 
-### iSpindel
-
-Assuming BrewBlox is accessible at http://<BREWBLOX_IP>:9000/:
-
-- Switch iSpindel on
-- Press the reset button 3-4 times which sets up an access point
-- Connect to the Wifi network "iSpindel"
-- Open a browser on [http://192.168.4.1](http://192.168.4.1)
-- From the "Configuration" menu, configure the Wifi access, then
-  - Service Type: `HTTP`
-    - Token:
-    - Server Address: `<BREWBLOX_IP>`
-    - Server Port: `9000`
-    - Server URL: `/ispindel/ispindel`
+### Deploy the iSpindel service on the BrewBlox stack
 
 
+You need to add the service to your existing BrewBlox docker compose file.
 
-### Deploy on the BrewBlox stack
-
-Docker images are available on docker hub, you need to add the service to your docker compose file:
 ```yaml
   ispindel:
     image: bdelbosc/brewblox-ispindel:rpi-latest
@@ -47,16 +32,41 @@ Docker images are available on docker hub, you need to add the service to your d
       - "traefik.frontend.rule=PathPrefix: /ispindel"
 ```
 
+The `brewblox-ispindel` docker images are available on docker hub.
+
 Note that the image tag to use is:
 - `rpi-latest` for the `arm` architecture (when deploying on a RaspberryPi)
 - `latest` for the `amd` architecture
 
+### Configure the iSpindel
+
+The `brewblox-ispindel` endpoint needs to be accessible in `HTTP`,
+you need to find the `IP` address and `PORT` where the service:
+[http://IP:PORT/ispindel/_service/status](http://IP:PORT/ispindel/_service/status)
+reply with a: 
+```json
+{"status": "ok"}
+```
+Then:
+- Switch the iSpindel on
+- Press the reset button 3-4 times which sets up an access point
+- Connect to the Wifi network "iSpindel"
+- Open a browser on [http://192.168.4.1](http://192.168.4.1)
+- From the "Configuration" menu, configure the Wifi access, then
+  - Service Type: `HTTP`
+    - Token:
+    - Server Address: `<IP>`
+    - Server Port: `<PORT>`
+    - Server URL: `/ispindel/ispindel`
+
+
+Double check that your are using an HTTP service type (and not a TCP).
+
 ### Add Graph to your dashboard
 
-From your dashboard add "ACTIONS" > "New Widget" 
-Select a Graph widget type, give it a title and Create.
+From your dashboard `ACTIONS > New Widget` then select and create a `Graph` widget.
 
-Then configure Metrics you should see something like that:
+Once the iSpindel is configured to send data to BrewBlox, you should see its metrics when configuring the widget:
 
 ![graph-ispindel](./graph-ispindel.png)
 
@@ -97,13 +107,32 @@ curl -XPOST http://localhost:9000/ispindel/ispindel
 -d'{"name":"iSpindel000","ID":4974097,"angle":83.49442,"temperature":21.4375,"temp_units":"C","battery":4.035453,"gravity":30.29128,"interval":60,"RSSI":-76}'
 ```
 
-### View influxdb data
+### Check iSpindel service logs
+
+Each time the service receive a request there is a log showing the temperature and gravity.
+From the directory where is defined the `docker-compose.yml` file: 
+
+```bash
+docker-compose logs ispindel
+...
+ispindel_1 | 2019/04/12 14:18:34 INFO __main__ iSpindel iSpindel000, temp: 21.75, gravity: 22.63023
+ispindel_1 | 2019/04/12 14:19:05 INFO __main__ iSpindel iSpindel000, temp: 21.6875, gravity: 22.69526
+```
+
+### View iSpindel metrics persisted in the influxdb database
 
 This is assuming a BrewBlox system is active in the current directory.
 
 ```sql
 docker-compose exec influx influx
 > USE brewblox
+> SHOW SERIES
+key
+---
+iSpindel000 -- This is the name given to the iSpindel
+sparkey
+spock
+
 > SELECT * FROM "iSpindel000"
 name: iSpindel000
 time                angle    battery  gravity   rssi temperature
@@ -111,7 +140,20 @@ time                angle    battery  gravity   rssi temperature
 1546121491626257000 83.49442 4.035453 30.29128  -76  21.4375
 1546121530861939000 84.41665 4.035453 30.75696  -75  19.125
 
+> -- Latest metrics  
+> PRECISION rfc3339
+> SELECT * FROM "iSpindel000" WHERE time > now() -5m ORDER BY time DESC LIMIT 10
+time                         Combined Influx points angle    battery  gravity  rssi temperature
+----                        ----------------------- -----    -------  -------  ---- -----------
+2019-04-12T14:15:29.715678Z 1                       71.6947  4.233577 22.67045 -68  21.9375
+2019-04-12T14:14:58.997279Z 1                       71.58447 4.233577 22.51496 -67  21.9375
+
 ```
+
+## TODO
+
+- Give a docker-compose configuration to expose the service in http and in https
+- Support an HTTP token
 
 ## Limitations
 
