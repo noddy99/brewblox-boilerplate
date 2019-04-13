@@ -11,7 +11,7 @@ This project is under active development.
 
 The iSpindel is configured to send metrics using the generic HTTP POST protocol.
 
-When the iSpindel wake up (like every 2 minutes) it submits a POST request containing the metrics to the iSpindel BrewBlox service.
+When the iSpindel wake up (like every minute) it submits a POST request containing the metrics to the iSpindel BrewBlox service.
 
 The service then publish metrics to the event-bus, the BrewBlox history service is in charge to persist the metrics into the InfluxDB database.
 
@@ -110,7 +110,7 @@ curl -XPOST http://localhost:9000/ispindel/ispindel
 ### Check iSpindel service logs
 
 Each time the service receive a request there is a log showing the temperature and gravity.
-From the directory where is defined the `docker-compose.yml` file: 
+To run from the directory containing the `docker-compose.yml` file.
 
 ```bash
 docker-compose logs ispindel
@@ -121,7 +121,7 @@ ispindel_1 | 2019/04/12 14:19:05 INFO __main__ iSpindel iSpindel000, temp: 21.68
 
 ### View iSpindel metrics persisted in the influxdb database
 
-This is assuming a BrewBlox system is active in the current directory.
+To run from the directory containing the `docker-compose.yml` file.
 
 ```sql
 docker-compose exec influx influx
@@ -152,9 +152,9 @@ time                         Combined Influx points angle    battery  gravity  r
 
 ## TODO
 
-- Give a docker-compose configuration to expose the service in http and in https
-- Support an HTTP token
+- Give a docker-compose configuration to expose the service in http (default is now https which is not supported by iSpindel)
+- Support an HTTP token that can be set in the docker-compose file.
 
 ## Limitations
 
-- There is no security on the ispindel endpoint
+- There is no security on the iSpindel endpoint
