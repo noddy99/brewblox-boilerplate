@@ -1,30 +1,32 @@
-# BrewBlox iSpindel service
+# BrewBlox Service for the iSpindel Hydrometer
 
-This a BrewBlox service to support [iSpindel](https://github.com/universam1/iSpindel/)
-an electronic hydrometer.
+The [iSpindel](https://github.com/universam1/iSpindel/) is a DIY wireless hydrometer and thermometer used to gather live readings of specific gravity and temperature when brewing beer.
+
+[BrewBlox](https://brewpi.com/) is a modular brewery control system design to work with the BrewPi controller.
 
 
-This project is under active development.
+This brewblox service integrates the iSpindel hydrometer into BrewBlox.
 
 
 ## How does it work ?
 
-The iSpindel is configured to send metrics using the generic HTTP POST protocol.
+The iSpindel is configured to send metrics using HTTP.
 
-When the iSpindel wake up (like every minute) it submits a POST request containing the metrics to the iSpindel BrewBlox service.
+When the iSpindel wake up (like every minute) it submits an HTTP POST request to the iSpindel BrewBlox service.
 
-The service then publish metrics to the event-bus, the BrewBlox history service is in charge to persist the metrics into the InfluxDB database.
+The metrics are then published to the event-bus, the BrewBlox history service persists the metrics into the InfluxDB database.
 
-## Configuration
+A Graph widget can be added in the BrewBlox UI to display the persisted metrics.
 
-### Deploy the iSpindel service on the BrewBlox stack
+## Usage
 
+### Deploy the iSpindel service in the BrewBlox stack
 
-You need to add the service to your existing BrewBlox docker compose file.
+You need to add the service to your existing BrewBlox docker compose file:
 
 ```yaml
   ispindel:
-    image: bdelbosc/brewblox-ispindel:rpi-latest
+    image: bdelbosc/brewblox-ispindel:rpi-develop
     depends_on:
       - history
     labels:
@@ -32,11 +34,11 @@ You need to add the service to your existing BrewBlox docker compose file.
       - "traefik.frontend.rule=PathPrefix: /ispindel"
 ```
 
-The `brewblox-ispindel` docker images are available on docker hub.
+The `brewblox-ispindel` docker images are available on [Docker Hub](https://cloud.docker.com/repository/docker/bdelbosc/brewblox-ispindel).
 
 Note that the image tag to use is:
-- `rpi-latest` for the `arm` architecture (when deploying on a RaspberryPi)
-- `latest` for the `amd` architecture
+- `rpi-develop` for the `arm` architecture (when deploying on a RaspberryPi)
+- `develop` for the `amd` architecture
 
 ### Configure the iSpindel
 
@@ -103,8 +105,7 @@ Use `-a amd` to build the `latest` image for amd architecture.
 From the BrewBlox host:
 
 ```bash
-curl -XPOST http://localhost:9000/ispindel/ispindel
--d'{"name":"iSpindel000","ID":4974097,"angle":83.49442,"temperature":21.4375,"temp_units":"C","battery":4.035453,"gravity":30.29128,"interval":60,"RSSI":-76}'
+curl -XPOST http://localhost:9000/ispindel/ispindel -d'{"name":"iSpindel000","ID":4974097,"angle":83.49442,"temperature":21.4375,"temp_units":"C","battery":4.035453,"gravity":30.29128,"interval":60,"RSSI":-76}'
 ```
 
 ### Check iSpindel service logs
@@ -150,14 +151,16 @@ time                         Combined Influx points angle    battery  gravity  r
 
 ```
 
-### [azure-pipelines.yml](./azure-pipelines.yml)
+### Continuous integration pipeline
 
-[Azure](https://dev.azure.com) can automatically test and deploy all commits you push to GitHub. If you haven't enabled travis for your repository: don't worry, it won't do anything.
+Using [Azure](https://dev.azure.com), the [pipeline](./azure-pipelines.yml) automatically test and deploy all commits
+pushed on the GitHub repository.
 
-To deploy your software, you will also need [PyPi](https://pypi.org/) and [Docker Hub](https://hub.docker.com/) accounts.
+This means that docker images for `arm` and `amd` are published on [Docker Hub](https://hub.docker.com/) and the python package is deployed on [PyPi](https://pypi.org/).
 
 ## TODO
 
+- Debug mode where the service subscribes to the `brewcast` channel to debug what is published.
 - Give a docker-compose configuration to expose the service in http (default is now https which is not supported by iSpindel)
 - Support an HTTP token that can be set in the docker-compose file.
 
