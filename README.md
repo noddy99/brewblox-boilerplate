@@ -150,6 +150,12 @@ time                         Combined Influx points angle    battery  gravity  r
 
 ```
 
+### [azure-pipelines.yml](./azure-pipelines.yml)
+
+[Azure](https://dev.azure.com) can automatically test and deploy all commits you push to GitHub. If you haven't enabled travis for your repository: don't worry, it won't do anything.
+
+To deploy your software, you will also need [PyPi](https://pypi.org/) and [Docker Hub](https://hub.docker.com/) accounts.
+
 ## TODO
 
 - Give a docker-compose configuration to expose the service in http (default is now https which is not supported by iSpindel)
