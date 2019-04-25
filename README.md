@@ -8,7 +8,7 @@ The [iSpindel](https://github.com/universam1/iSpindel/) is a DIY wireless hydrom
 This brewblox service integrates the iSpindel hydrometer into BrewBlox.
 
 
-## How does it work ?
+## How does it work?
 
 The iSpindel is configured to send metrics using HTTP.
 
@@ -27,8 +27,11 @@ You need to add the service to your existing BrewBlox docker compose file:
 ```yaml
   ispindel:
     image: bdelbosc/brewblox-ispindel:rpi-develop
+    restart: unless-stopped
     depends_on:
       - history
+    ports:
+      - "5080:5000"
     labels:
       - "traefik.port=5000"
       - "traefik.frontend.rule=PathPrefix: /ispindel"
@@ -36,19 +39,41 @@ You need to add the service to your existing BrewBlox docker compose file:
 
 The `brewblox-ispindel` docker images are available on [Docker Hub](https://cloud.docker.com/repository/docker/bdelbosc/brewblox-ispindel).
 
-Note that the image tag to use is:
+The image tag to use is:
 - `rpi-develop` for the `arm` architecture (when deploying on a RaspberryPi)
 - `develop` for the `amd` architecture
 
+Note that this will expose an `HTTP` endpoint on port `5080` from your RaspberryPi,
+this is needed because the iSpindel does not handle HTTPS.
+
+Start your BrewBlox stack using `brewblox-ctl up`.
+
+Check that the service is running:
+```bash
+# Run the docker-compose command from the directory holding the brewblox docker-compose file
+$ docker-compose ps ispindel
+       Name                     Command              State           Ports         
+-----------------------------------------------------------------------------------
+brewblox_ispindel_1   python3 -m brewblox_ispindel   Up      0.0.0.0:5080->5000/tcp
+
+$ docker-compose logs ispindel
+...
+ispindel_1   | ======== Running on http://0.0.0.0:5000 ========
+...
+```
+
+
 ### Configure the iSpindel
 
-The `brewblox-ispindel` endpoint needs to be accessible in `HTTP`,
-you need to find the `IP` address and `PORT` where the service:
-[http://IP:PORT/ispindel/_service/status](http://IP:PORT/ispindel/_service/status)
-reply with a: 
+First find the `IP` address of your BrewBlox server then check that:
+[http://IP:5080/ispindel/_service/status](http://IP:5080/ispindel/_service/status)
+replies with a:
 ```json
 {"status": "ok"}
 ```
+
+Note the port `5080` is the exposed port in the `docker-compose.yml` file.
+
 Then:
 - Switch the iSpindel on
 - Press the reset button 3-4 times which sets up an access point
@@ -58,11 +83,11 @@ Then:
   - Service Type: `HTTP`
     - Token:
     - Server Address: `<IP>`
-    - Server Port: `<PORT>`
+    - Server Port: `5080`
     - Server URL: `/ispindel/ispindel`
 
 
-Double check that your are using an HTTP service type (and not a TCP).
+Double check that your are using an **HTTP** service type (and not a TCP).
 
 ### Add Graph to your dashboard
 
@@ -105,7 +130,11 @@ Use `-a amd` to build the `latest` image for amd architecture.
 From the BrewBlox host:
 
 ```bash
-curl -XPOST http://localhost:9000/ispindel/ispindel -d'{"name":"iSpindel000","ID":4974097,"angle":83.49442,"temperature":21.4375,"temp_units":"C","battery":4.035453,"gravity":30.29128,"interval":60,"RSSI":-76}'
+curl -XPOST http://localhost:5080/ispindel/ispindel -d'{"name":"iSpindel000","ID":4974097,"angle":83.49442,"temperature":21.4375,"temp_units":"C","battery":4.035453,"gravity":30.29128,"interval":60,"RSSI":-76}'
+
+# or using https
+curl --insecure -XPOST https://localhost/ispindel/ispindel -d'{"name":"iSpindel000","ID":4974097,"angle":83.49442,"temperature":21.4375,"temp_units":"C","battery":4.035453,"gravity":30.29128,"interval":60,"RSSI":-76}'
+
 ```
 
 ### Check iSpindel service logs
@@ -161,7 +190,6 @@ This means that docker images for `arm` and `amd` are published on [Docker Hub](
 ## TODO
 
 - Debug mode where the service subscribes to the `brewcast` channel to debug what is published.
-- Give a docker-compose configuration to expose the service in http (default is now https which is not supported by iSpindel)
 - Support an HTTP token that can be set in the docker-compose file.
 
 ## Limitations
