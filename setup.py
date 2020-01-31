@@ -4,6 +4,7 @@ setup(
     name='brewblox-ispindel',
     version='0.3.0',
     long_description=open('README.md').read(),
+    long_description_content_type='text/markdown',
     url='https://github.com/bdelbosc/brewblox-ispindel',
     author='Benoit Delbosc',
     author_email='bdelbosc@free.fr',
