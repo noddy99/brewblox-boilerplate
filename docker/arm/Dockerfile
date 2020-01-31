@@ -13,7 +13,6 @@ EXPOSE 5000
 WORKDIR /app
 
 COPY --from=base /wheeley /wheeley
-COPY ./config /app/config
 
 RUN pip3 install --no-index --find-links=/wheeley brewblox-ispindel \
     && rm -rf /wheeley \

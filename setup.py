@@ -2,7 +2,7 @@ from setuptools import find_packages, setup
 
 setup(
     name='brewblox-ispindel',
-    version='0.2.0',
+    version='0.3.0',
     long_description=open('README.md').read(),
     url='https://github.com/bdelbosc/brewblox-ispindel',
     author='Benoit Delbosc',
