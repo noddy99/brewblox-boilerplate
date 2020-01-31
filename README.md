@@ -43,8 +43,8 @@ The image tag to use is:
 - `rpi-develop` for the `arm` architecture (when deploying on a RaspberryPi)
 - `develop` for the `amd` architecture
 
-Note that this will expose an `HTTP` endpoint on port `5080` from your RaspberryPi,
-this is needed because the iSpindel does not handle HTTPS.
+Note that the service expose an `HTTP` endpoint on port `5080`
+this is required because the iSpindel does not handle `HTTPS`.
 
 Start your BrewBlox stack using `brewblox-ctl up`.
 
@@ -72,7 +72,7 @@ replies with a:
 {"status": "ok"}
 ```
 
-Note the port `5080` is the exposed port in the `docker-compose.yml` file.
+Note that the port must be set according to what is exposed in the `docker-compose.yml` file (`5080` is our case).
 
 Then:
 - Switch the iSpindel on
@@ -89,11 +89,11 @@ Then:
 
 Double check that your are using an **HTTP** service type (and not a TCP).
 
-### Add Graph to your dashboard
+### Add a Graph to your dashboard
 
 From your dashboard `ACTIONS > New Widget` then select and create a `Graph` widget.
 
-Once the iSpindel is configured to send data to BrewBlox, you should see its metrics when configuring the widget:
+Once the iSpindel has sent some data, you should see its metrics when configuring the widget:
 
 ![graph-ispindel](./graph-ispindel.png)
 
