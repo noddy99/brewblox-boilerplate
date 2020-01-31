@@ -52,7 +52,7 @@ Check that the service is running:
 ```bash
 # Run the docker-compose command from the directory holding the brewblox docker-compose file
 $ docker-compose ps ispindel
-       Name                     Command              State           Ports         
+       Name                     Command              State           Ports
 -----------------------------------------------------------------------------------
 brewblox_ispindel_1   python3 -m brewblox_ispindel   Up      0.0.0.0:5080->5000/tcp
 
@@ -97,20 +97,27 @@ Once the iSpindel is configured to send data to BrewBlox, you should see its met
 
 ![graph-ispindel](./graph-ispindel.png)
 
-  
+
 ## Development
+
+### Get started
+
+To get started:
+```bash
+# Add repository containing Python 3.8
+sudo add-apt-repository ppa:deadsnakes/ppa
+
+sudo apt install -y python3-pip python3.8 python3.8-dev
+pip3 install --user pipenv
+
+# in the brewblox-ispindel directory
+pipenv --python 3.8
+pipenv sync -d
+```
 
 ### Run tests
 
 ```bash
-# install pip3 if not already done
-sudo pip3 install pipenv
-
-# init the env
-pipenv lock
-pipenv sync -d
-
-# Run the tests
 pipenv run pytest
 ```
 
@@ -120,7 +127,7 @@ pipenv run pytest
 
 2. Go into the brewblox-ispindel directory and build the `rpi-latest` image
 ```bash
-bbt-localbuild -r bdelbosc/brewblox-ispindel --tags latest -a arm
+brewblox-dev localbuild -r bdelbosc/brewblox-ispindel --tags latest -a arm
 ```
 
 Use `-a amd` to build the `latest` image for amd architecture.
@@ -170,7 +177,7 @@ time                angle    battery  gravity   rssi temperature
 1546121491626257000 83.49442 4.035453 30.29128  -76  21.4375
 1546121530861939000 84.41665 4.035453 30.75696  -75  19.125
 
-> -- Latest metrics  
+> -- Latest metrics
 > PRECISION rfc3339
 > SELECT * FROM "iSpindel000" WHERE time > now() -5m ORDER BY time DESC LIMIT 10
 time                         Combined Influx points angle    battery  gravity  rssi temperature
