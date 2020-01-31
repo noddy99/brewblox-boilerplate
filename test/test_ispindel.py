@@ -1,10 +1,9 @@
 """
-Checks whether we can call the hello endpoint.
+Tests the iSpindel endpoint
 """
-from unittest.mock import call
+from unittest.mock import AsyncMock, call
 
 import pytest
-from asynctest import CoroutineMock
 from brewblox_service import scheduler
 
 import brewblox_ispindel.__main__ as main
@@ -48,7 +47,7 @@ def dummy_listener(mocker):
 @pytest.fixture
 def mock_publisher(mocker):
     m = mocker.patch(TESTED + '.events.get_publisher')
-    m.return_value.publish = CoroutineMock()
+    m.return_value.publish = AsyncMock()
     return m.return_value
 
 
