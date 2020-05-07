@@ -1,19 +1,22 @@
 """
 Tests the iSpindel endpoint
 """
-from unittest.mock import AsyncMock, call
+from mock import AsyncMock, call
 
 import pytest
-from brewblox_service import scheduler
+from brewblox_service import brewblox_logger, scheduler
+from brewblox_ispindel import ispindel_service as ispindel
 
 import brewblox_ispindel.__main__ as main
+
+LOGGER = brewblox_logger(__name__)
 
 TESTED = main.__name__
 
 BODY_OK = '{"name":"iSpindel000","ID":4974097,"angle":83.49442,"temperature":21.4375,"temp_units":"C",' + \
           '"battery":4.035453,"gravity":30.29128,"interval":60,"RSSI":-76}'
 
-EVENT_OK = {"angle": 83.49442, "temperature": 21.4375, "battery": 4.035453, "gravity": 30.29128, "rssi": -76}
+EVENT_OK = {'angle': 83.49442, 'temperature': 21.4375, 'battery': 4.035453, 'gravity': 30.29128, 'rssi': -76}
 
 
 class DummyListener:
@@ -32,7 +35,7 @@ class DummyListener:
 
 @pytest.fixture
 async def app(app, mock_publisher, dummy_listener):
-    app.router.add_routes(main.routes)
+    app.router.add_routes(ispindel.routes)
     scheduler.setup(app)
     return app
 
@@ -57,6 +60,6 @@ async def test_ispindel(app, client, mock_publisher):
     assert await res.text() == ''
     assert mock_publisher.publish.call_count > 0
     assert mock_publisher.publish.call_args_list[-1] == call(
-        'brewcast',
+        'brewcast.history',
         'iSpindel000',
         EVENT_OK)

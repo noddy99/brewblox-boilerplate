@@ -102,35 +102,96 @@ Once the iSpindel has sent some data, you should see its metrics when configurin
 
 ### Get started
 
-To get started:
-```bash
-# Add repository containing Python 3.8
-sudo add-apt-repository ppa:deadsnakes/ppa
+#### Install
 
-sudo apt install -y python3-pip python3.8 python3.8-dev
-pip3 install --user pipenv
-
-# in the brewblox-ispindel directory
-pipenv --python 3.8
-pipenv sync -d
+Install [Pyenv](https://github.com/pyenv/pyenv):
 ```
+sudo apt-get update -y && sudo apt-get install -y make build-essential libssl-dev zlib1g-dev libbz2-dev \
+libreadline-dev libsqlite3-dev wget curl llvm libncurses5-dev libncursesw5-dev \
+xz-utils tk-dev libffi-dev liblzma-dev python-openssl git
+
+curl https://pyenv.run | bash
+```
+After installing, it may suggest to add initialization code to ~/.bashrc. Do that.
+
+
+Install Python 3.7:
+```
+pyenv install 3.7.7
+```
+
+Install [Poetry](https://python-poetry.org/)
+```
+pip install --user poetry
+```
+
+#### Setup env
+
+```
+pyenv local 3.7.7
+poetry install
+```
+
+During development, you need to have your environment activated.
+```
+poetry activated
+```
+When it is activated, your terminal prompt is prefixed with `(.venv)`.
 
 ### Run tests
 
 ```bash
-pipenv run pytest
+poetry run pytest
 ```
 
 ### Build a docker image
 
-1. Install the [brewblox-tools](https://github.com/BrewBlox/brewblox-tools)
 
-2. Go into the brewblox-ispindel directory and build the `rpi-latest` image
+A docker file for running your package. To build the image for both desktop computers (AMD), and Raspberry Pi (ARM):
+
+Prepare the builder (run once per shell):
+
 ```bash
-brewblox-dev localbuild -r bdelbosc/brewblox-ispindel --tags latest -a arm
+# Buildx is an experimental feature
+export DOCKER_CLI_EXPERIMENTAL=enabled
+
+# Enable the QEMU emulator, required for building ARM images on an AMD computer
+docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
+
+# Remove previous builder
+docker buildx rm bricklayer || true
+
+# Create and use a new builder
+docker buildx create --use --name bricklayer
+
+# Bootstrap the newly created builder
+docker buildx inspect --bootstrap
 ```
 
-Use `-a amd` to build the `latest` image for amd architecture.
+Build
+
+```bash
+# Will build your Python package, and copy the results to the docker/ directory
+bash docker/before_build.sh
+
+# Build the image for amd and arm
+# Give the image a tag
+# Push the image to the docker registry
+docker buildx build \
+    --push \
+    --platform linux/amd64,linux/arm/v7 \
+    --tag "bdelbosc/brewblox-ispindel":"local" \
+    docker
+```
+
+Run it locally:
+```bash
+docker buildx build \
+    --load \
+    --platform linux/amd64 \
+    --tag bdelbosc/brewblox-ispindel:local \
+    docker
+```
 
 ### Simulate iSpindel request
 

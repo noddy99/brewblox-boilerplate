@@ -9,6 +9,8 @@ import logging
 import pytest
 from brewblox_service import service, brewblox_logger, features
 
+from brewblox_ispindel.__main__ import create_parser
+
 LOGGER = brewblox_logger(__name__)
 
 
@@ -26,23 +28,27 @@ def app_config() -> dict:
         'name': 'test_app',
         'host': 'localhost',
         'port': 1234,
-        'debug': True,
+        'debug': False,
+        'poll_interval': 5,
+        'history_exchange': 'brewcast.history',
     }
 
 
 @pytest.fixture
 def sys_args(app_config) -> list:
-    return [
+    return [str(v) for v in [
         'app_name',
         '--name', app_config['name'],
         '--host', app_config['host'],
-        '--port', str(app_config['port']),
-    ]
+        '--port', app_config['port'],
+        '--history-exchange', app_config['history_exchange'],
+    ]]
 
 
 @pytest.fixture
 def app(sys_args):
-    app = service.create_app('default', raw_args=sys_args[1:])
+    parser = create_parser('default')
+    app = service.create_app(parser=parser, raw_args=sys_args[1:])
     return app
 
 
