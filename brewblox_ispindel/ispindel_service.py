@@ -3,8 +3,7 @@ ISpindel http endpoint
 """
 
 from aiohttp import web
-
-from brewblox_service import brewblox_logger, events
+from brewblox_service import brewblox_logger, mqtt
 
 routes = web.RouteTableDef()
 
@@ -13,7 +12,7 @@ LOGGER = brewblox_logger(__name__)
 
 def setup(app: web.Application):
     app.router.add_routes(routes)
-    LOGGER.info(f'Setup iSpindel register endpoint')
+    LOGGER.info('Setup iSpindel register endpoint')
 
 
 @routes.post('/ispindel')
@@ -48,12 +47,15 @@ async def ispindel_handler(request: web.Request) -> web.Response:
     if not name or not temperature:
         LOGGER.info('Bad request: ' + str(request.text()))
         return web.Response(status=400)
-    publisher = events.get_publisher(request.app)
-    exchange = request.app['config']['history_exchange']
-    await publisher.publish(exchange, name, {'temperature': temperature,
-                                             'battery': battery,
-                                             'angle': angle,
-                                             'rssi': rssi,
-                                             'gravity': gravity})
+    topic = request.app['config']['history_topic']
+    service_name = request.app['config']['name']
+    await mqtt.publish(request.app,
+                       topic,
+                       {'key': service_name,
+                        'data': {'temperature': temperature,
+                                 'battery': battery,
+                                 'angle': angle,
+                                 'rssi': rssi,
+                                 'gravity': gravity}})
     LOGGER.info(f'iSpindel {name}, temp: {temperature}, gravity: {gravity}')
     return web.Response(status=200)
