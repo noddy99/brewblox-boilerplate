@@ -45,7 +45,7 @@ async def ispindel_handler(request: web.Request) -> web.Response:
     rssi = body.get('RSSI')
     angle = body.get('angle')
     if not name or not temperature:
-        LOGGER.info('Bad request: ' + str(request.text()))
+        LOGGER.info(f'Bad request: "{body}"')
         return web.Response(status=400)
     topic = request.app['config']['history_topic']
     service_name = request.app['config']['name']
