@@ -1,6 +1,8 @@
 """
 Tests the iSpindel endpoint
 """
+import json
+
 import pytest
 from brewblox_service import brewblox_logger
 from brewblox_service.testing import response
@@ -31,7 +33,7 @@ def app(app):
 
 
 async def test_ispindel(app, client, m_publisher):
-    await response(client.post('/ispindel', data=BODY_OK))
+    await response(client.post('/ispindel', json=json.loads(BODY_OK)))
     m_publisher.assert_awaited_once_with(
         app,
         'brewcast/history',
@@ -42,5 +44,5 @@ async def test_ispindel(app, client, m_publisher):
 
 
 async def test_invalid(app, client, m_publisher):
-    await response(client.post('/ispindel', json={}), status=400)
+    await response(client.post('/ispindel', json={}), status=422)
     m_publisher.assert_not_awaited()
