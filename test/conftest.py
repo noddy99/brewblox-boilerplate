@@ -7,7 +7,7 @@ Any fixtures declared here are available to all test functions in this directory
 import logging
 
 import pytest
-from brewblox_service import service, brewblox_logger, features
+from brewblox_service import brewblox_logger, service
 
 from brewblox_ispindel.__main__ import create_parser
 
@@ -30,7 +30,7 @@ def app_config() -> dict:
         'port': 1234,
         'debug': False,
         'poll_interval': 5,
-        'history_exchange': 'brewcast.history',
+        'history_topic': 'brewcast/history',
     }
 
 
@@ -41,7 +41,7 @@ def sys_args(app_config) -> list:
         '--name', app_config['name'],
         '--host', app_config['host'],
         '--port', app_config['port'],
-        '--history-exchange', app_config['history_exchange'],
+        '--history-topic', app_config['history_topic'],
     ]]
 
 
@@ -53,13 +53,9 @@ def app(sys_args):
 
 
 @pytest.fixture
-def client(app, aiohttp_client, loop):
+async def client(app, aiohttp_client, loop):
     """Allows patching the app or aiohttp_client before yielding it.
 
     Any tests wishing to add custom behavior to app can override the fixture
     """
-    LOGGER.info('Available features:')
-    for name, impl in app.get(features.FEATURES_KEY, {}).items():
-        LOGGER.info(f'Feature "{name}" = {impl}')
-
-    return loop.run_until_complete(aiohttp_client(app))
+    return await aiohttp_client(app)

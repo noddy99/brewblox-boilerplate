@@ -26,10 +26,8 @@ You need to add the service to your existing BrewBlox docker compose file:
 
 ```yaml
   ispindel:
-    image: bdelbosc/brewblox-ispindel:rpi-develop
+    image: bdelbosc/brewblox-ispindel:develop
     restart: unless-stopped
-    depends_on:
-      - history
     ports:
       - "5080:5000"
     labels:
@@ -38,10 +36,6 @@ You need to add the service to your existing BrewBlox docker compose file:
 ```
 
 The `brewblox-ispindel` docker images are available on [Docker Hub](https://cloud.docker.com/repository/docker/bdelbosc/brewblox-ispindel).
-
-The image tag to use is:
-- `rpi-develop` for the `arm` architecture (when deploying on a RaspberryPi)
-- `develop` for the `amd` architecture
 
 Note that the service expose an `HTTP` endpoint on port `5080`
 this is required because the iSpindel does not handle `HTTPS`.
