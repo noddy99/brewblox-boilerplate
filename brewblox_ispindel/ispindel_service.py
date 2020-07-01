@@ -48,10 +48,9 @@ async def ispindel_handler(request: web.Request) -> web.Response:
     angle = data.get('angle')
 
     topic = request.app['config']['history_topic']
-    service_name = request.app['config']['name']
     await mqtt.publish(request.app,
                        topic,
-                       {'key': service_name,
+                       {'key': name,
                         'data': {'temperature': temperature,
                                  'battery': battery,
                                  'angle': angle,
