@@ -38,7 +38,7 @@ async def test_ispindel(app, client, m_publisher):
         app,
         'brewcast/history',
         {
-            'key': 'test_app',
+            'key': 'iSpindel000',
             'data': EVENT_OK,
         })
 
