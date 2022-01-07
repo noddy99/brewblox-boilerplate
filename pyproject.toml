@@ -1,8 +1,8 @@
 [tool.poetry]
-name = "YOUR-PACKAGE"
+name = "brewblox-bt"
 version = "0.1.0"
 description = "ADD DESCRIPTION HERE"
-authors = ["Code Fairies Inc <noreply@santa.com>"]
+authors = ["Noddy99 <noddy99@santa.com>"]
 license = "GPL-3.0"
 readme = "README.md"
 

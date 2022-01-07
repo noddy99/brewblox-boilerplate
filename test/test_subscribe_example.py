@@ -7,7 +7,7 @@ from unittest.mock import AsyncMock
 import pytest
 from brewblox_service.testing import matching
 
-from YOUR_PACKAGE import subscribe_example
+from brewblox_bt import subscribe_example
 
 TESTED = subscribe_example.__name__
 
